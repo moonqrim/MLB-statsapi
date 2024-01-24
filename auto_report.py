@@ -37,10 +37,10 @@ def auto_report(gamePk):
 
     fig, ax = plt.subplots(ncols=2, sharey=True)
 
-    ax[0].barh(df, away, align='center', color='crimson', zorder=10)
+    ax[0].barh(df, away, align='center', color='lightgrey', zorder=10)
     ax[0].set(title=boxscore['teamInfo']['away']['shortName'])
 
-    ax[1].barh(df, home, align='center', color='lightgrey', zorder=10)
+    ax[1].barh(df, home, align='center', color='crimson', zorder=10)
     ax[1].set(title=boxscore['teamInfo']['home']['shortName'])
 
     ax[0].set(yticks=df, yticklabels=cols)
