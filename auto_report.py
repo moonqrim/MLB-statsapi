@@ -1,6 +1,8 @@
 import statsapi
 import matplotlib.pyplot as plt
 import numpy as np
+import plotly.graph_objects as go
+from datetime import datetime
 
 def search_game_id(team, date):
     game = statsapi.schedule(start_date=date, team=team)
@@ -62,8 +64,39 @@ def auto_report(gamePk):
     fig.subplots_adjust(wspace=0.165)
     fig.show()
 
+
+def win_proba_per_game(gamePk):
+    home_added_prob, color, time = [], [], []
+
+    for proba in statsapi.get('game_winProbability', {'gamePk' : gamePk}):
+        home_added_prob.append(proba['homeTeamWinProbability'] - proba['awayTeamWinProbability'])
+        time_str = proba['about']['startTime']
+        time.append(datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%S.%fZ'))
+        point_color = 'crimson' if (proba['homeTeamWinProbability']-proba['awayTeamWinProbability']) > 0 else ('lightgrey' if (proba['homeTeamWinProbability']-proba['awayTeamWinProbability']) < 0 else 'darkgrey')
+        color.append(point_color)
+
+    fig = go.Figure()
+    for i in range(len(time)):
+         fig.add_trace(
+             go.Scatter(
+                 x=[time[i]], y=[home_added_prob[i]], mode='markers+lines',
+                 line=dict(color=color[i]), text=[f'{home_added_prob[i]:.2f}']
+                 )
+             )
+
+    fig.update_layout(
+        yaxis=dict(range=[-105, 105]),
+        xaxis=dict(showline=False, showticklabels=False),
+        title='Win Probability',
+        plot_bgcolor='white',
+        showlegend=False
+    )
+    fig.add_hline(y=0,line_width=1, line_dash="dash",line_color="grey")
+    fig.show()
+
 gamePk = search_game_id(143, '07/01/2018')
 # sample
 # 143 : PHI
 
 auto_report(gamePk)
+win_proba_per_game(gamePk)
