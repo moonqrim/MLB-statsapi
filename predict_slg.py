@@ -20,7 +20,7 @@ def make_frame(yearlst):
     df = pd.DataFrame(columns=cols)
     df_lst = []
 
-    for gamePk in tqdm(yearlst[:10]):
+    for gamePk in tqdm(yearlst):
         for all_play in statsapi.get('game_playByPlay', {'gamePk': gamePk})['allPlays']:
             try:
                 event_type = all_play['result']['event']
