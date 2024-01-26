@@ -1,5 +1,6 @@
 import pandas as pd
 import statsapi
+from tqdm import tqdm
 
 def search_gamePk_by_year(year):
     yearlst = []
@@ -7,7 +8,7 @@ def search_gamePk_by_year(year):
     start_game_date = search['seasonStartDate']
     end_game_date = search['seasonEndDate']
 
-    for year in statsapi.schedule(start_date=start_game_date, end_date=end_game_date):
+    for year in tqdm(statsapi.schedule(start_date=start_game_date, end_date=end_game_date)):
         yearlst.append(year['game_id'])
 
     return yearlst
@@ -17,8 +18,9 @@ def make_frame(yearlst):
             'pitch_break_length', 'pitch_breakY', 'pitch_break_vertical', 'pitch_break_vertical_induced',
             'pitch_extension', 'pitch_spin_direction', 'total_distance', 'slg']
     df = pd.DataFrame(columns=cols)
+    df_lst = []
 
-    for gamePk in yearlst:
+    for gamePk in tqdm(yearlst[:10]):
         for all_play in statsapi.get('game_playByPlay', {'gamePk': gamePk})['allPlays']:
             try:
                 event_type = all_play['result']['event']
@@ -41,7 +43,8 @@ def make_frame(yearlst):
                     'total_distance': all_play['playEvents'][-1]['hitData']['totalDistance'],
                     'slg': slg_value
                 }
-                df = df.append(play_data, ignore_index=True)
+                df_lst.append(pd.DataFrame(play_data, index=[0]))
+                df = pd.concat(df_lst, ignore_index=True)
 
             except KeyError:
                 pass
@@ -52,3 +55,4 @@ def make_frame(yearlst):
 
 yearlst = search_gamePk_by_year('2023')
 df = make_frame(yearlst)
+print(df)
