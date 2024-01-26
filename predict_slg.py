@@ -44,10 +44,12 @@ def make_frame(yearlst):
                     'slg': slg_value
                 }
                 df_lst.append(pd.DataFrame(play_data, index=[0]))
-                df = pd.concat(df_lst, ignore_index=True)
+
 
             except KeyError:
                 pass
+            
+    df = pd.concat(df_lst, ignore_index=True)
 
     return df
 
@@ -55,4 +57,4 @@ def make_frame(yearlst):
 
 yearlst = search_gamePk_by_year('2023')
 df = make_frame(yearlst)
-print(df)
+df.to_csv('slg_frame(2023).csv')
