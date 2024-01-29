@@ -94,9 +94,68 @@ def win_proba_per_game(gamePk):
     fig.add_hline(y=0,line_width=1, line_dash="dash",line_color="grey")
     fig.show()
 
+
+def time_line(gamePk):
+    fig, ax = plt.subplots()
+
+    inn_lst = statsapi.get('game', {'gamePk': gamePk})['liveData']['linescore']['innings']
+    for i, inn in enumerate(inn_lst):
+        away_runs = inn['away']['runs']
+        away_lobs = inn['away']['leftOnBase']
+        home_runs = inn['home']['runs'] * -1
+        home_lobs = inn['home']['leftOnBase'] * -1
+
+        away_total = away_runs + away_lobs
+        home_total = home_runs + home_lobs
+
+        ax.bar(
+            i, away_runs, width=0.4, label=f'Away - {inn["num"]}',
+            color='darkgrey', edgecolor='black'
+        )
+        ax.bar(
+            i, away_total, width=0.4, label=f'Away - {inn["num"]}', bottom=away_runs,
+            color='lightgrey', edgecolor='black', alpha=0.3
+        )
+
+        ax.bar(
+            i, home_runs, width=0.4, label=f'Home - {inn["num"]}',
+            color='crimson', edgecolor='black'
+        )
+        ax.bar(
+            i, home_total, width=0.4, label=f'Home - {inn["num"]}', bottom=home_runs,
+            color='lightgrey', edgecolor='black', alpha=0.3
+        )
+
+        if away_total != 0:
+            ax.text(i, away_total + 1, str(away_total), ha='center', va='bottom', color='black')
+            if away_runs != 0:
+                ax.text(i, away_runs + 1, str(away_runs), ha='center', va='bottom', color='black')
+        if home_total != 0:
+            ax.text(i, (home_total + 1), str(home_total * -1), ha='center', va='bottom', color='black')
+            if home_runs != 0:
+                ax.text(i, (home_runs + 1), str(home_runs * -1), ha='center', va='bottom', color='black')
+
+    ax.set_xticks(range(len(inn_lst)))
+    ax.set_xticklabels([str(inn['num']) + "'s" for inn in inn_lst])
+    ax.set_yticklabels([])
+
+    legend_color_mapping = {
+        'Away runs': 'darkgrey',
+        'Home runs': 'crimson',
+        'left on base': 'lightgrey'
+    }
+
+    handles = [plt.Rectangle((0, 0), 1, 1, color=legend_color_mapping[label]) for label in legend_color_mapping.keys()]
+    ax.legend(handles, legend_color_mapping.keys(), loc=(1.0, 1.0), fontsize=6)
+
+    plt.show()
+
+
+
 gamePk = search_game_id(143, '07/01/2018')
 # sample
 # 143 : PHI
 
 auto_report(gamePk)
 win_proba_per_game(gamePk)
+time_line(gamePk)
